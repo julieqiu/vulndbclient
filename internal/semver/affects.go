@@ -43,7 +43,7 @@ func Affects(a []models.Range, v string) bool {
 //   - no-fix is not an event, as opposed to being an
 //     event where Introduced="" and Fixed=""
 func containsSemver(ar models.Range, v string) bool {
-	if ar.Type != models.RangeTypeSemver {
+	if ar.Type != models.RangeSemVer {
 		return false
 	}
 	if len(ar.Events) == 0 {

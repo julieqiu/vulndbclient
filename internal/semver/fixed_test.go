@@ -7,25 +7,25 @@ package semver
 import (
 	"testing"
 
-	"golang.org/x/vuln/internal/osv"
+	"github.com/google/osv-scanner/pkg/models"
 )
 
 func TestLatestFixedVersion(t *testing.T) {
 	tests := []struct {
 		name   string
-		ranges []osv.Range
+		ranges []models.Range
 		want   string
 	}{
 		{
 			name:   "empty",
-			ranges: []osv.Range{},
+			ranges: []models.Range{},
 			want:   "",
 		},
 		{
 			name: "no fix",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{
 						Introduced: "0",
 					},
@@ -35,9 +35,9 @@ func TestLatestFixedVersion(t *testing.T) {
 		},
 		{
 			name: "no latest fix",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{Introduced: "0"},
 					{Fixed: "1.0.4"},
 					{Introduced: "1.1.2"},
@@ -47,9 +47,9 @@ func TestLatestFixedVersion(t *testing.T) {
 		},
 		{
 			name: "unsorted no latest fix",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{Fixed: "1.0.4"},
 					{Introduced: "0"},
 					{Introduced: "1.1.2"},
@@ -61,9 +61,9 @@ func TestLatestFixedVersion(t *testing.T) {
 		},
 		{
 			name: "unsorted with fix",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{
 						Fixed: "1.0.0",
 					},
@@ -82,9 +82,9 @@ func TestLatestFixedVersion(t *testing.T) {
 		},
 		{
 			name: "multiple ranges",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{
 						Introduced: "0",
 					},
@@ -94,8 +94,8 @@ func TestLatestFixedVersion(t *testing.T) {
 				},
 			},
 				{
-					Type: osv.RangeTypeSemver,
-					Events: []osv.RangeEvent{
+					Type: models.RangeSemVer,
+					Events: []models.Event{
 						{
 							Introduced: "0",
 						},
@@ -108,9 +108,9 @@ func TestLatestFixedVersion(t *testing.T) {
 		},
 		{
 			name: "pseudoversion",
-			ranges: []osv.Range{{
-				Type: osv.RangeTypeSemver,
-				Events: []osv.RangeEvent{
+			ranges: []models.Range{{
+				Type: models.RangeSemVer,
+				Events: []models.Event{
 					{
 						Introduced: "0",
 					},

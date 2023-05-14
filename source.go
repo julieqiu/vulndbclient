@@ -16,6 +16,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/google/osv-scanner/pkg/models"
 	"github.com/julieqiu/derrors"
 	isem "github.com/julieqiu/vulndbclient/internal/semver"
 	"github.com/julieqiu/vulndbclient/internal/web"
@@ -111,7 +112,7 @@ func newInMemorySource(entries []*models.Vulnerability) (*inMemorySource, error)
 			db.Modified = entry.Modified
 		}
 		for _, affected := range entry.Affected {
-			modulePath := affected.Module.Path
+			modulePath := affected.Package.Name
 			if _, ok := modulesMap[modulePath]; !ok {
 				modulesMap[modulePath] = &moduleMeta{
 					Path:  modulePath,

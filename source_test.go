@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"os"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestGet(t *testing.T) {
@@ -26,20 +28,22 @@ func TestGet(t *testing.T) {
 		},
 	}
 	for _, tc := range tcs {
-		test := func(t *testing.T, s source) {
-			got, err := s.get(context.Background(), tc.endpoint)
-			if err != nil {
-				t.Fatal(err)
+		t.Run(tc.endpoint, func(t *testing.T) {
+			test := func(t *testing.T, s source) {
+				got, err := s.get(context.Background(), tc.endpoint)
+				if err != nil {
+					t.Fatal(err)
+				}
+				want, err := os.ReadFile(testVulndb + "/" + tc.endpoint + ".json")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if diff := cmp.Diff(want, got); diff != "" {
+					t.Errorf("mismatch(-want, +got): %s", diff)
+				}
 			}
-			want, err := os.ReadFile(testVulndb + "/" + tc.endpoint + ".json")
-			if err != nil {
-				t.Fatal(err)
-			}
-			if string(got) != string(want) {
-				t.Errorf("get(%s) = %s, want %s", tc.endpoint, got, want)
-			}
-		}
-		testAllSourceTypes(t, test)
+			testAllSourceTypes(t, test)
+		})
 	}
 }
 

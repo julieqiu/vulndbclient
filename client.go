@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/osv-scanner/pkg/models"
 	"github.com/julieqiu/derrors"
 	isem "github.com/julieqiu/vulndbclient/internal/semver"
 	"github.com/julieqiu/vulndbclient/internal/web"
@@ -103,7 +104,7 @@ func newLocalClient(uri *url.URL) (*Client, error) {
 	return &Client{source: fs}, nil
 }
 
-func NewInMemoryClient(entries []*models.vulnerability) (*Client, error) {
+func NewInMemoryClient(entries []*models.Vulnerability) (*Client, error) {
 	s, err := newInMemorySource(entries)
 	if err != nil {
 		return nil, err
@@ -245,7 +246,7 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta
 	if req.Version != "" {
 		affected := func(e *models.Vulnerability) bool {
 			for _, a := range e.Affected {
-				if a.Module.Path == req.Path && isem.Affects(a.Ranges, req.Version) {
+				if a.Package.Name == req.Path && isem.Affects(a.Ranges, req.Version) {
 					return true
 				}
 			}
