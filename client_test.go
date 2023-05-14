@@ -17,8 +17,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"golang.org/x/vuln/internal/osv"
-	"golang.org/x/vuln/internal/web"
+	"github.com/julieqiu/vulndbclient/internal/web"
 )
 
 var (
@@ -47,17 +46,17 @@ func newTestServer(dir string) *httptest.Server {
 	return httptest.NewServer(mux)
 }
 
-func entries(ids []string) ([]*osv.Entry, error) {
+func entries(ids []string) ([]*models.Vulnerability, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	entries := make([]*osv.Entry, len(ids))
+	entries := make([]*models.Vulnerability, len(ids))
 	for i, id := range ids {
 		b, err := os.ReadFile(filepath.Join(testVulndb, idDir, id+".json"))
 		if err != nil {
 			return nil, err
 		}
-		var entry osv.Entry
+		var entry models.Vulnerability
 		if err := json.Unmarshal(b, &entry); err != nil {
 			return nil, err
 		}

@@ -21,11 +21,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/julieqiu/derrors"
+	isem "github.com/julieqiu/vulndbclient/internal/semver"
+	"github.com/julieqiu/vulndbclient/internal/web"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/vuln/internal/derrors"
-	"golang.org/x/vuln/internal/osv"
-	isem "golang.org/x/vuln/internal/semver"
-	"golang.org/x/vuln/internal/web"
 )
 
 // A Client for reading vulnerability databases.
@@ -104,7 +103,7 @@ func newLocalClient(uri *url.URL) (*Client, error) {
 	return &Client{source: fs}, nil
 }
 
-func NewInMemoryClient(entries []*osv.Entry) (*Client, error) {
+func NewInMemoryClient(entries []*models.vulnerability) (*Client, error) {
 	s, err := newInMemorySource(entries)
 	if err != nil {
 		return nil, err
@@ -140,7 +139,7 @@ type ModuleRequest struct {
 type ModuleResponse struct {
 	Path    string
 	Version string
-	Entries []*osv.Entry
+	Entries []*models.Vulnerability
 }
 
 // ByModules returns a list of responses
@@ -212,7 +211,7 @@ func (c *Client) moduleMetas(ctx context.Context, reqs []*ModuleRequest) (_ []*m
 
 // byModule returns the OSV entries matching the ModuleRequest,
 // or (nil, nil) if there are none.
-func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta) (_ []*osv.Entry, err error) {
+func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta) (_ []*models.Vulnerability, err error) {
 	// This module isn't in the database.
 	if m == nil {
 		return nil, nil
@@ -244,7 +243,7 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta
 
 	// Filter by version.
 	if req.Version != "" {
-		affected := func(e *osv.Entry) bool {
+		affected := func(e *models.Vulnerability) bool {
 			for _, a := range e.Affected {
 				if a.Module.Path == req.Path && isem.Affects(a.Ranges, req.Version) {
 					return true
@@ -253,7 +252,7 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta
 			return false
 		}
 
-		var filtered []*osv.Entry
+		var filtered []*models.Vulnerability
 		for _, entry := range entries {
 			if affected(entry) {
 				filtered = append(filtered, entry)
@@ -271,8 +270,8 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta
 	return entries, nil
 }
 
-func (c *Client) byIDs(ctx context.Context, ids []string) (_ []*osv.Entry, err error) {
-	entries := make([]*osv.Entry, len(ids))
+func (c *Client) byIDs(ctx context.Context, ids []string) (_ []*models.Vulnerability, err error) {
+	entries := make([]*models.Vulnerability, len(ids))
 	g, gctx := errgroup.WithContext(ctx)
 	g.SetLimit(10)
 	for i, id := range ids {
@@ -295,7 +294,7 @@ func (c *Client) byIDs(ctx context.Context, ids []string) (_ []*osv.Entry, err e
 
 // byID returns the OSV entry with the given ID,
 // or an error if it does not exist / cannot be unmarshaled.
-func (c *Client) byID(ctx context.Context, id string) (_ *osv.Entry, err error) {
+func (c *Client) byID(ctx context.Context, id string) (_ *models.Vulnerability, err error) {
 	derrors.Wrap(&err, "byID(%s)", id)
 
 	b, err := c.source.get(ctx, entryEndpoint(id))
@@ -303,7 +302,7 @@ func (c *Client) byID(ctx context.Context, id string) (_ *osv.Entry, err error) 
 		return nil, err
 	}
 
-	var entry osv.Entry
+	var entry models.Vulnerability
 	if err := json.Unmarshal(b, &entry); err != nil {
 		return nil, err
 	}

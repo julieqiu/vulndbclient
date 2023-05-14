@@ -16,10 +16,9 @@ import (
 	"os"
 	"sort"
 
-	"golang.org/x/vuln/internal/derrors"
-	"golang.org/x/vuln/internal/osv"
-	isem "golang.org/x/vuln/internal/semver"
-	"golang.org/x/vuln/internal/web"
+	"github.com/julieqiu/derrors"
+	isem "github.com/julieqiu/vulndbclient/internal/semver"
+	"github.com/julieqiu/vulndbclient/internal/web"
 )
 
 type source interface {
@@ -100,7 +99,7 @@ func (ls *localSource) get(ctx context.Context, endpoint string) (_ []byte, err 
 
 // newInMemorySource creates a new in-memory source.
 // Adapted from x/vulndb/internal/database.go.
-func newInMemorySource(entries []*osv.Entry) (*inMemorySource, error) {
+func newInMemorySource(entries []*models.Vulnerability) (*inMemorySource, error) {
 	data := make(map[string][]byte)
 	db := dbMeta{}
 	modulesMap := make(map[string]*moduleMeta)
