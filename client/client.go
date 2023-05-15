@@ -259,7 +259,7 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *ModuleMeta
 		return nil, nil
 	}
 
-	entries, err := c.byIDs(ctx, ids)
+	entries, err := c.ByIDs(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +293,7 @@ func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *ModuleMeta
 	return entries, nil
 }
 
-func (c *Client) byIDs(ctx context.Context, ids []string) (_ []*models.Vulnerability, err error) {
+func (c *Client) ByIDs(ctx context.Context, ids []string) (_ []*models.Vulnerability, err error) {
 	entries := make([]*models.Vulnerability, len(ids))
 	g, gctx := errgroup.WithContext(ctx)
 	g.SetLimit(10)
