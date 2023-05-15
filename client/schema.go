@@ -30,11 +30,11 @@ type dbMeta struct {
 	Modified time.Time `json:"modified"`
 }
 
-// moduleMeta contains metadata about a Go module that has one
+// ModuleMeta contains metadata about a Go module that has one
 // or more vulnerabilities in the database.
 //
 // Found in the "index/modules" endpoint of the vulnerability database.
-type moduleMeta struct {
+type ModuleMeta struct {
 	// Path is the module path.
 	Path string `json:"path"`
 	// Vulns is a list of vulnerabilities that affect this module.

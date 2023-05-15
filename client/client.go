@@ -182,7 +182,29 @@ func (c *Client) ByModules(ctx context.Context, reqs []*ModuleRequest) (_ []*Mod
 	return resps, nil
 }
 
-func (c *Client) moduleMetas(ctx context.Context, reqs []*ModuleRequest) (_ []*moduleMeta, err error) {
+func (c *Client) ListModules(ctx context.Context) (_ []*ModuleMeta, err error) {
+	b, err := c.source.get(ctx, modulesEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	dec, err := newStreamDecoder(b)
+	if err != nil {
+		return nil, err
+	}
+
+	var metas []*ModuleMeta
+	for dec.More() {
+		var m ModuleMeta
+		err := dec.Decode(&m)
+		if err != nil {
+			return nil, err
+		}
+		metas = append(metas, &m)
+	}
+	return metas, nil
+}
+
+func (c *Client) moduleMetas(ctx context.Context, reqs []*ModuleRequest) (_ []*ModuleMeta, err error) {
 	b, err := c.source.get(ctx, modulesEndpoint)
 	if err != nil {
 		return nil, err
@@ -193,9 +215,9 @@ func (c *Client) moduleMetas(ctx context.Context, reqs []*ModuleRequest) (_ []*m
 		return nil, err
 	}
 
-	metas := make([]*moduleMeta, len(reqs))
+	metas := make([]*ModuleMeta, len(reqs))
 	for dec.More() {
-		var m moduleMeta
+		var m ModuleMeta
 		err := dec.Decode(&m)
 		if err != nil {
 			return nil, err
@@ -212,7 +234,7 @@ func (c *Client) moduleMetas(ctx context.Context, reqs []*ModuleRequest) (_ []*m
 
 // byModule returns the OSV entries matching the ModuleRequest,
 // or (nil, nil) if there are none.
-func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *moduleMeta) (_ []*models.Vulnerability, err error) {
+func (c *Client) byModule(ctx context.Context, req *ModuleRequest, m *ModuleMeta) (_ []*models.Vulnerability, err error) {
 	// This module isn't in the database.
 	if m == nil {
 		return nil, nil

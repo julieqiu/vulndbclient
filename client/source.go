@@ -103,7 +103,7 @@ func (ls *localSource) get(ctx context.Context, endpoint string) (_ []byte, err 
 func newInMemorySource(entries []*models.Vulnerability) (*inMemorySource, error) {
 	data := make(map[string][]byte)
 	db := dbMeta{}
-	modulesMap := make(map[string]*moduleMeta)
+	modulesMap := make(map[string]*ModuleMeta)
 	for _, entry := range entries {
 		if entry.ID == "" {
 			return nil, fmt.Errorf("entry %v has no ID", entry)
@@ -114,7 +114,7 @@ func newInMemorySource(entries []*models.Vulnerability) (*inMemorySource, error)
 		for _, affected := range entry.Affected {
 			modulePath := affected.Package.Name
 			if _, ok := modulesMap[modulePath]; !ok {
-				modulesMap[modulePath] = &moduleMeta{
+				modulesMap[modulePath] = &ModuleMeta{
 					Path:  modulePath,
 					Vulns: []moduleVuln{},
 				}
@@ -140,7 +140,7 @@ func newInMemorySource(entries []*models.Vulnerability) (*inMemorySource, error)
 	data[dbEndpoint] = b
 
 	// Add the modules endpoint.
-	modules := make([]*moduleMeta, 0, len(modulesMap))
+	modules := make([]*ModuleMeta, 0, len(modulesMap))
 	for _, module := range modulesMap {
 		modules = append(modules, module)
 	}
